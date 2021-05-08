@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+		<link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style_main.css') }}">
+		<title>BLAST PARSER</title>
+	</head>
+
+	<body>
+		<h1>BLAST PARSER!</h1>
+		<br>
+		<p>Upload the BLAST text file, then click upload to get the Excel File!</p>
+		<br>
+
+		<form method=post enctype=multipart/form-data>
+			<div>
+				<input type=file name=file>
+			</div>
+			<br>
+			<br>
+			<br>
+			<div>
+				<input type=submit value=Upload>
+			</div>
+			
+		</form>
+
+	<footer>		
+		<a href="https://github.com/GinoP123/BLAST_parser">GitHub</a>
+	</footer>
+			<!-- 
+		    <div class="form-group">
+		        <label for="username">ID</label>
+		        <input type="text" name="username"
+		               placeholder="username" class="form-control"></input>
+		    </div>
+
+		    <div class="form-group">
+		        <label for="passowrd">Password</label>
+		        <input type="text" name="password"
+		               placeholder="Password" class="form-control"></input>
+		    </div>
+
+		    <div class="form-group">
+		        <button type="submit" class="btn btn-primary">Submit</button>
+		    </div>
+ -->
+
+	</body>
+</html>
