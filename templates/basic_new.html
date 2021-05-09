@@ -14,16 +14,17 @@
 		<br>
 
 		<form method=post enctype=multipart/form-data>
-			<div>
-				<input type=file name=file>
-			</div>
-			<br>
-			<br>
-			<br>
-			<div>
-				<input type=submit value=Upload>
-			</div>
-			
+			<input type=file name=file>
+			<input type=submit value=Upload>
+		</form>
+		<br>
+		<br>
+		<br>
+		<br>
+		<h2>New! Batch Search</h2>
+		<form method="POST" enctype="multipart/form-data">
+			<input type="file" name="file[]" multiple="">
+			<input type="submit" value="Upload">
 		</form>
 
 	<footer>		

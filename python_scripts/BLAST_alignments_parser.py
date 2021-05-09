@@ -41,7 +41,7 @@ def parse_line(String, line_type):
 	return data
 
 
-def parse(data, filename):
+def parse(filename, data):
 	phage_data = {}
 	df_dictionary = {column: [] for column in df_columns}
 

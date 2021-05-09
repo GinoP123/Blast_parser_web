@@ -1,27 +1,8 @@
-import pandas as pd
-import os
-
+import python_scripts.Excel_Writers as Excel_Writers
 
 alignment_line = "Alignments:\n"
 strings_to_find = ["Sequence ID: ", "Expect:", "Identities:"]
 substrings = ["Identities:", "Positives:", "Gaps:"]
-df_columns = ["name", "Genome length",	"E-Value (expect)",	"Percent identities", "Percent positives", "Accession number/Sequence ID"]
-
-complete_names = []
-complete_lengths = []
-
-with open(f"names_lengths.txt") as infile_names_lengths:
-	lines = infile_names_lengths.readlines()
-
-	for line in lines:
-		if not line.strip():
-			continue
-
-		name, length = line.strip().split(", ")
-		complete_names.append(name)
-		complete_lengths.append(length)
-
-assert len(complete_names) == 96
 
 
 def find_text(String, char1, char2):
@@ -41,9 +22,11 @@ def parse_line(String, line_type):
 	return data
 
 
-def parse(data, filename):
+def parse(filename, data, write=True, path=None):
+	if path is None and filename:
+		path = f"/tmp/{filename}.xlsx"
+
 	phage_data = {}
-	df_dictionary = {column: [] for column in df_columns}
 
 	new_list = []
 	found_alignment_section = False
@@ -83,29 +66,24 @@ def parse(data, filename):
 				if len(phage_data[names[-1]]) == 4:
 					names = []
 
-
 	for name in phage_data:
 		assert len(phage_data[name]) == 4
 
-	for name, length in zip(complete_names, complete_lengths):
-		df_dictionary["name"].append(name)
-		df_dictionary["Genome length"].append(length)
-		for column in df_columns[2:]:
-			df_dictionary[column].append("")
-	names = [name.strip() for name in complete_names]
+	if write:
+		single_writer = Excel_Writers.Excel_Writer(path)
+		single_writer.write(filename, phage_data)
 
-	for i, name in enumerate(names):
-		if name in phage_data:
-			df_dictionary["Accession number/Sequence ID"][i] = phage_data[name][0]
-			df_dictionary["E-Value (expect)"][i] = phage_data[name][1]
-			df_dictionary["Percent identities"][i] = phage_data[name][2]
-			df_dictionary["Percent positives"][i] = phage_data[name][3]
+	return phage_data
 
 
-	if os.path.exists(f"/tmp/{filename}.xlsx"):
-		os.remove(f"/tmp/{filename}.xlsx")
+def parse_batch(filenames, content_lists, path="/tmp/outfile.xlsx"):
+	# return " ".join(filenames)
 
-	df = pd.DataFrame(df_dictionary)
-	df.to_excel(f"/tmp/{filename}.xlsx", index=False)
+	batch_phage_data = {}
 
-	assert len(df) == 96
+	for filename, content in zip(filenames, content_lists):
+		batch_phage_data[filename] = parse(None, content, False)
+
+	batch_writer = Excel_Writers.Excel_Batch_Writer(path)
+	batch_writer.write(filenames, batch_phage_data)
+

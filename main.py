@@ -7,7 +7,7 @@ from werkzeug.exceptions import abort
 from flask import send_file
 from werkzeug.utils import secure_filename
 from google.cloud.storage import Blob
-from python_scripts.BLAST_alignments_parser import *
+import python_scripts.BLAST_new_alignments_parser as parser
 import python_scripts.reset as reset
 
 
@@ -18,9 +18,15 @@ app.config['UPLOAD_FOLDER'] = "uploads"
 def cout(String):
     print(String, file=sys.stderr)
 
-def download_return(filename, contents):
-    parse(contents, filename)
-    return send_file_function(f"/tmp/{filename}.xlsx")
+def return_single_parse(filename, contents):
+    path = f"/tmp/{filename}.xlsx"
+    parser.parse(filename, contents, True, path)
+    return send_file_function(path)
+
+def return_batch_parse(filenames, contents):
+    path = "/tmp/Batch Parse Results.xlsx"
+    parser.parse_batch(filenames, contents, path)
+    return send_file_function(path)
 
 
 def send_file_function(path, as_attachment=True):
@@ -36,18 +42,39 @@ def index():
     user = "guest"
     if request.method == 'POST':
 
-        file = request.files['file']
+        if "file" in request.files:
+            file = request.files['file']
 
-        filename = secure_filename(file.filename)
-        
-        if not filename.endswith(".txt"):
-            return "Wrong Format (only .txts)"
-        filename = filename[:-4]
+            filename = secure_filename(file.filename)
+            
+            if not filename.endswith(".txt"):
+                return "Wrong Format (only .txts)"
+            filename = filename[:-4]
 
-        contents = []
-        for line in file:
-            contents.append(line.decode("utf-8"))
+            contents = []
+            for line in file:
+                contents.append(line.decode("utf-8"))
 
-        return download_return(filename=filename, contents=contents)
+            return return_single_parse(filename, contents)
+
+        else:
+            files = request.files.getlist("file[]")
+            # file = request.files['file']
+
+            filenames = list(map(lambda x: secure_filename(x.filename), files))
+            
+            for filename in filenames:
+                if not filename.endswith(".txt"):
+                    return "Wrong Format (only .txts)"
+                filename = filename[:-4]
+
+            contents = []
+            for file in files:
+                file_contents = []
+                for line in file:
+                    file_contents.append(line.decode("utf-8"))
+                contents.append(file_contents)
+
+            return return_batch_parse(filenames, contents)
 
     return render_template('basic_new.html', user=user)
